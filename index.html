@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conversor de Texto para SRT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: #000;
+        color: #fff;
+      }
+      .secondary {
+        background-color: #556b2f;
+      }
+      textarea,
+      input {
+        background-color: #fff;
+        color: #000;
+      }
+    </style>
+  </head>
+  <body class="flex flex-col items-center justify-center min-h-screen">
+    <div class="container mx-auto p-4">
+      <h1 class="text-4xl font-bold mb-8 text-center">
+        Conversor de Texto para SRT
+      </h1>
+
+      <textarea
+        id="inputTexto"
+        rows="10"
+        class="w-full text-black p-4 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+        placeholder="Insira o texto aqui..."
+      ></textarea>
+
+      <button
+        id="gerarSRT"
+        class="px-6 py-2 bg-secondary text-white font-bold rounded-lg bg-green-700 hover:bg-green-800"
+      >
+        Gerar SRT
+      </button>
+
+      <textarea
+        id="outputSRT"
+        rows="10"
+        class="w-full text-black p-4 mt-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary"
+        placeholder="O SRT gerado aparecerá aqui..."
+      ></textarea>
+    </div>
+
+    <script>
+      document
+        .getElementById('gerarSRT')
+        .addEventListener('click', function () {
+          const texto = document.getElementById('inputTexto').value
+          const srt = gerarSRT(texto)
+          document.getElementById('outputSRT').value = srt
+        })
+
+      function gerarSRT(texto) {
+        const linhas = []
+        let partes = texto.split(/(?<=\.)|\n/)
+        let contador = 1
+        let tempoInicial = 0
+        let tempoFinal = 10
+
+        partes = partes.reduce((acc, parte) => {
+          if (
+            acc.length === 0 ||
+            acc[acc.length - 1].length + parte.length > 250
+          ) {
+            acc.push(parte.trim())
+          } else {
+            acc[acc.length - 1] += ' ' + parte.trim()
+          }
+          return acc
+        }, [])
+
+        partes.forEach(parte => {
+          const srtLinha = `${contador}\n00:00:${formatarTempo(
+            tempoInicial
+          )} --> 00:00:${formatarTempo(tempoFinal)}\n${parte}\n\n`
+          linhas.push(srtLinha)
+          contador++
+          tempoInicial += 10
+          tempoFinal += 10
+        })
+
+        return linhas.join('')
+      }
+
+      function formatarTempo(segundos) {
+        return String(segundos).padStart(2, '0') + ',000'
+      }
+    </script>
+  </body>
+</html>
